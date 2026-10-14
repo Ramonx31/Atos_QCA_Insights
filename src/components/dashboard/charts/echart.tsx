@@ -1,10 +1,11 @@
 "use client";
 
 import * as echarts from "echarts";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { EChartsOption } from "echarts";
+import { cn } from "@/lib/utils";
 
-export function EChart({ option, ariaLabel }: { option: EChartsOption; ariaLabel: string }) {
+export function EChart({ option, ariaLabel, className, style }: { option: EChartsOption; ariaLabel: string; className?: string; style?: CSSProperties }) {
   const element = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!element.current) return;
@@ -14,5 +15,5 @@ export function EChart({ option, ariaLabel }: { option: EChartsOption; ariaLabel
     observer.observe(element.current);
     return () => { observer.disconnect(); chart.dispose(); };
   }, [option]);
-  return <div ref={element} role="img" aria-label={ariaLabel} className="h-80 w-full" />;
+  return <div ref={element} role="img" aria-label={ariaLabel} className={cn("h-80 w-full", className)} style={style} />;
 }

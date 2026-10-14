@@ -5,7 +5,7 @@ import type { ScreenshotFile } from "@/server/uploads/schemas";
 
 const RESULTS_PREFIX = "results/";
 const SCREENSHOTS_PREFIX = "screenshots/";
-const EXTENSION_BY_MIME_TYPE: Record<ScreenshotFile["mimeType"], string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const EXTENSION_BY_MIME_TYPE: Record<ScreenshotFile["mimeType"], string> = { "application/pdf": "pdf" };
 
 const resultPath = (fileHash: string) => `${RESULTS_PREFIX}${fileHash}.json`;
 

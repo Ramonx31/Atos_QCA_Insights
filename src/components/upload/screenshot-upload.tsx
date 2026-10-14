@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import { isNonAutomatedAct } from "@/lib/non-automated-acts";
 import type { ValidationIssue } from "@/server/uploads/extraction-provider";
 
 interface ReviewRow { act: string; manual: number; automated: number; }
@@ -37,7 +38,7 @@ export function ScreenshotUpload() {
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
   const reset = () => { setStep("idle"); setFile(null); setRows([]); setIssues([]); };
-  const updateRow = (index: number, field: "manual" | "automated", value: string) => setRows((current) => current.map((row, position) => position === index ? { ...row, [field]: Math.max(0, Math.trunc(Number(value) || 0)) } : row));
+  const updateRow = (index: number, field: "act" | "manual" | "automated", value: string) => setRows((current) => current.map((row, position) => position === index ? { ...row, [field]: field === "act" ? value : Math.max(0, Math.trunc(Number(value) || 0)) } : row));
 
   async function readScreenshot(event: FormEvent) {
     event.preventDefault();
@@ -67,17 +68,17 @@ export function ScreenshotUpload() {
   }
 
   const busy = step === "reading" || step === "saving";
-  return <Card className="p-5"><h3 className="font-semibold">Enviar screenshot</h3><p className="mb-4 text-sm text-muted-foreground">O sistema lê a tabela de atos do print; você revisa os valores antes de salvar.</p>
+  return <Card className="p-5"><h3 className="font-semibold">Enviar PDF</h3><p className="mb-4 text-sm text-muted-foreground">Envie o PDF exportado pelo painel. A tabela de atos é lida diretamente do arquivo; você revisa os valores antes de salvar.</p>
     <form onSubmit={readScreenshot} className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-      <label className="text-sm xl:col-span-2">Screenshot (PNG, JPG ou WebP, até 4 MB)<input type="file" accept="image/png,image/jpeg,image/webp" disabled={step !== "idle"} onChange={(event) => setFile(event.target.files?.[0] ?? null)} className={`${inputClass} mt-1`} /></label>
+      <label className="text-sm xl:col-span-2">Relatório em PDF (até 10 MB)<input type="file" accept="application/pdf,.pdf" disabled={step !== "idle"} onChange={(event) => setFile(event.target.files?.[0] ?? null)} className={`${inputClass} mt-1`} /></label>
       <label className="text-sm">Competência<input type="month" required value={competence} disabled={step !== "idle"} onChange={(event) => setCompetence(event.target.value)} className={`${inputClass} mt-1`} /></label>
       {METADATA_FIELDS.map(([key, label]) => <label key={key} className="text-sm">{label} (opcional)<input type="text" maxLength={150} value={labels[key] ?? ""} disabled={step !== "idle"} onChange={(event) => setLabels((current) => ({ ...current, [key]: event.target.value }))} className={`${inputClass} mt-1`} /></label>)}
-      {step === "idle" || step === "reading" ? <button type="submit" disabled={!file || busy} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 md:col-span-2 xl:col-span-6 xl:justify-self-start">{step === "reading" ? "Lendo screenshot…" : "Ler screenshot"}</button> : null}
+      {step === "idle" || step === "reading" ? <button type="submit" disabled={!file || busy} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 md:col-span-2 xl:col-span-6 xl:justify-self-start">{step === "reading" ? "Lendo PDF…" : "Ler PDF"}</button> : null}
     </form>
     {message ? <p role="status" className={`mt-4 text-sm ${message.type === "error" ? "text-red-700" : "text-green-700"}`}>{message.text}</p> : null}
     {step === "review" || step === "saving" ? <div className="mt-5 space-y-4">
       {issues.length > 0 ? <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm"><p className="font-medium">Divergências encontradas na leitura — confira com o print:</p><ul className="list-disc pl-5">{issues.map((issue, index) => <li key={index}>{issue.scope === "act" ? issue.act : "Total"}: {ISSUE_LABELS[issue.code]} (esperado {issue.expected.toLocaleString("pt-BR")}, lido {issue.extracted.toLocaleString("pt-BR")})</li>)}</ul></div> : null}
-      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left text-muted-foreground"><th className="py-2 pr-3">Ato</th><th className="px-3">Manual</th><th className="px-3">Automatizado</th><th className="px-3">Total</th></tr></thead><tbody>{rows.map((row, index) => <tr key={index} className="border-b"><td className="py-2 pr-3">{row.act}</td><td className="px-3"><input type="number" min={0} value={row.manual} disabled={busy} onChange={(event) => updateRow(index, "manual", event.target.value)} className={`${inputClass} w-28`} /></td><td className="px-3"><input type="number" min={0} value={row.automated} disabled={busy} onChange={(event) => updateRow(index, "automated", event.target.value)} className={`${inputClass} w-28`} /></td><td className="px-3 tabular-nums">{(row.manual + row.automated).toLocaleString("pt-BR")}</td></tr>)}</tbody></table></div>
+      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left text-muted-foreground"><th className="py-2 pr-3">Ato</th><th className="px-3">Manual</th><th className="px-3">Automatizado</th><th className="px-3">Total</th></tr></thead><tbody>{rows.map((row, index) => <tr key={index} className={`border-b ${isNonAutomatedAct(row.act) ? "bg-red-50" : ""}`}><td className="py-2 pr-3"><div className="flex min-w-56 flex-wrap items-center gap-2"><input type="text" value={row.act} disabled={busy} onChange={(event) => updateRow(index, "act", event.target.value)} className={inputClass} />{isNonAutomatedAct(row.act) ? <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">Sem automação</span> : null}</div></td><td className="px-3"><input type="number" min={0} value={row.manual} disabled={busy} onChange={(event) => updateRow(index, "manual", event.target.value)} className={`${inputClass} w-28`} /></td><td className="px-3"><input type="number" min={0} value={row.automated} disabled={busy} onChange={(event) => updateRow(index, "automated", event.target.value)} className={`${inputClass} w-28`} /></td><td className="px-3 tabular-nums">{(row.manual + row.automated).toLocaleString("pt-BR")}</td></tr>)}</tbody></table></div>
       <div className="flex gap-3"><button type="button" onClick={confirm} disabled={busy} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">{step === "saving" ? "Salvando…" : "Confirmar e salvar"}</button><button type="button" onClick={reset} disabled={busy} className="rounded-md border px-4 py-2 text-sm disabled:opacity-50">Cancelar</button></div>
     </div> : null}
   </Card>;

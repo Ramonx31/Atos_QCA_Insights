@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { referenceDashboardExtractionFixture } from "@/server/uploads/fixtures/reference-dashboard-extraction.fixture";
 import { ScreenshotExtractionService } from "@/server/uploads/services/screenshot-extraction-service";
 
-const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
-const file = { originalFilename: "painel.PNG", mimeType: "image/png" as const, bytes: png };
+const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+const file = { originalFilename: "painel.pdf", mimeType: "application/pdf" as const, bytes: pdf };
 const metadata = { competence: "2026-09", cell: "Operações", manager: "" };
 
 function createService(providerResult: unknown = referenceDashboardExtractionFixture, duplicate = false) {

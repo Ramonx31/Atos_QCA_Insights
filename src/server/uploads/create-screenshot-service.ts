@@ -1,12 +1,12 @@
 import "server-only";
 import { createResultStore } from "@/server/results/create-result-store";
-import { ClaudeExtractionProvider } from "@/server/uploads/claude-extraction-provider";
+import { PdfExtractionProvider } from "@/server/uploads/pdf-extraction-provider";
 import { ScreenshotExtractionService } from "@/server/uploads/services/screenshot-extraction-service";
 import { SafeApplicationError, invalidUpload, toSafeError } from "@/server/security/errors";
 import type { ScreenshotFile } from "@/server/uploads/schemas";
 
 export function createScreenshotService(): ScreenshotExtractionService {
-  return new ScreenshotExtractionService(createResultStore(), new ClaudeExtractionProvider());
+  return new ScreenshotExtractionService(createResultStore(), new PdfExtractionProvider());
 }
 
 /** Lê o campo "file" do multipart e converte para o formato validado pelo serviço. */

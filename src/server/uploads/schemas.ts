@@ -1,13 +1,11 @@
 import { z } from "zod";
 
-export const SUPPORTED_SCREENSHOT_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+export const SUPPORTED_SCREENSHOT_MIME_TYPES = ["application/pdf"] as const;
 /** Funções serverless da Vercel aceitam corpos de até ~4,5 MB; o upload é reenviado na confirmação. */
-export const MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024;
+export const MAX_SCREENSHOT_BYTES = 10 * 1024 * 1024;
 
 const extensionForMimeType: Record<(typeof SUPPORTED_SCREENSHOT_MIME_TYPES)[number], RegExp> = {
-  "image/png": /\.png$/i,
-  "image/jpeg": /\.jpe?g$/i,
-  "image/webp": /\.webp$/i,
+  "application/pdf": /\.pdf$/i,
 };
 
 export const screenshotFileSchema = z.object({
@@ -17,7 +15,7 @@ export const screenshotFileSchema = z.object({
 }).superRefine((file, context) => {
   if (!extensionForMimeType[file.mimeType].test(file.originalFilename)) context.addIssue({ code: z.ZodIssueCode.custom, path: ["originalFilename"], message: "Extensão incompatível com o tipo do arquivo" });
   const signature = file.bytes;
-  const valid = file.mimeType === "image/png" ? signature[0] === 0x89 && signature[1] === 0x50 && signature[2] === 0x4e && signature[3] === 0x47 : file.mimeType === "image/jpeg" ? signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff : signature[0] === 0x52 && signature[1] === 0x49 && signature[2] === 0x46 && signature[3] === 0x46 && signature[8] === 0x57 && signature[9] === 0x45 && signature[10] === 0x42 && signature[11] === 0x50;
+  const valid = signature[0] === 0x25 && signature[1] === 0x50 && signature[2] === 0x44 && signature[3] === 0x46;
   if (!valid) context.addIssue({ code: z.ZodIssueCode.custom, path: ["bytes"], message: "Conteúdo incompatível com o tipo MIME" });
 });
 

@@ -10,6 +10,7 @@ export const rateLimited = () => new SafeApplicationError(429, "Muitas solicita�
 export const invalidUpload = () => new SafeApplicationError(400, "Arquivo de upload inválido.");
 export const duplicateUpload = () => new SafeApplicationError(409, "Este screenshot já foi enviado.");
 export const processingFailed = () => new SafeApplicationError(422, "Não foi possível processar o arquivo enviado.");
+export const localOcrUnavailable = () => new SafeApplicationError(503, "O OCR local do Windows não está disponível. Instale o reconhecimento óptico de caracteres em português (Brasil) nas configurações de Idioma do Windows.");
 
 /** Nunca encaminha stack traces, caminhos ou mensagens de fornecedores ao cliente. */
 export function toSafeError(error: unknown): SafeApplicationError {
