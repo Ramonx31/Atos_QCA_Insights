@@ -68,7 +68,7 @@ export function ScreenshotUpload() {
   }
 
   const busy = step === "reading" || step === "saving";
-  return <Card className="p-5"><h3 className="font-semibold">Enviar PDF</h3><p className="mb-4 text-sm text-muted-foreground">Envie o PDF exportado pelo painel. A tabela de atos é lida diretamente do arquivo; você revisa os valores antes de salvar.</p>
+  return <Card className="p-5"><h3 className="font-semibold">Enviar PDF</h3><p className="mb-4 text-sm text-muted-foreground">Envie o PDF exportado pelo painel. A tabela de atos é lida diretamente do arquivo; você revisa os valores antes de salvar. Um novo PDF para a mesma competência e contexto substitui a versão anterior no dashboard.</p>
     <form onSubmit={readScreenshot} className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
       <label className="text-sm xl:col-span-2">Relatório em PDF (até 10 MB)<input type="file" accept="application/pdf,.pdf" disabled={step !== "idle"} onChange={(event) => setFile(event.target.files?.[0] ?? null)} className={`${inputClass} mt-1`} /></label>
       <label className="text-sm">Competência<input type="month" required value={competence} disabled={step !== "idle"} onChange={(event) => setCompetence(event.target.value)} className={`${inputClass} mt-1`} /></label>

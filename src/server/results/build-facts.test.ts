@@ -13,11 +13,20 @@ describe("buildDashboardFacts", () => {
     expect(fact).toMatchObject({ actName: "Distribuição", manual: 3, automated: 7, cells: ["Operações"], managers: ["Ana"], directorates: [], costCenter: "CC1" });
   });
 
-  it("unifica nomes equivalentes usando o primeiro upload", () => {
+  it("usa o nome da versão vigente para atos equivalentes", () => {
     const facts = buildDashboardFacts([
       upload({ id: "b".repeat(64), uploadedAt: "2026-10-02T10:00:00.000Z", acts: [{ act: "DISTRIBUICAO", manual: 1, automated: 1 }] }),
       upload({}),
     ]);
-    expect(new Set(facts.map((fact) => fact.actName))).toEqual(new Set(["Distribuição"]));
+    expect(new Set(facts.map((fact) => fact.actName))).toEqual(new Set(["DISTRIBUICAO"]));
+  });
+
+  it("mantém somente o PDF mais recente para a mesma competência e contexto", () => {
+    const facts = buildDashboardFacts([
+      upload({ id: "a".repeat(64), uploadedAt: "2026-09-01T10:00:00.000Z", acts: [{ act: "Ato", manual: 10, automated: 1 }] }),
+      upload({ id: "b".repeat(64), uploadedAt: "2026-09-02T10:00:00.000Z", acts: [{ act: "Ato", manual: 4, automated: 6 }] }),
+    ]);
+    expect(facts).toHaveLength(1);
+    expect(facts[0]).toMatchObject({ manual: 4, automated: 6 });
   });
 });
