@@ -58,6 +58,7 @@ export const extractionPayloadSchema = z.object({
 
 const MAX_ACTS_PER_UPLOAD = 200;
 const optionalLabel = z.string().trim().max(150).optional().transform((value) => value || null);
+const optionalLabels = z.array(z.string().trim().min(1).max(150)).max(100).optional().default([]);
 
 /** Contexto organizacional informado por quem envia; a competência é obrigatória e as demais etiquetas são opcionais. */
 export const uploadMetadataSchema = z.object({
@@ -65,6 +66,7 @@ export const uploadMetadataSchema = z.object({
   directorate: optionalLabel,
   costCenter: optionalLabel,
   cell: optionalLabel,
+  cells: optionalLabels,
   manager: optionalLabel,
 });
 

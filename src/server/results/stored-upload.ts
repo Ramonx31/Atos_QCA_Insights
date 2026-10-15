@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const optionalLabel = z.string().trim().max(150).nullable();
+const optionalLabels = z.array(z.string().trim().min(1).max(150)).max(100).optional().default([]);
 
 export const storedActSchema = z.object({
   act: z.string().trim().min(1).max(200),
@@ -18,6 +19,7 @@ export const storedUploadSchema = z.object({
   directorate: optionalLabel,
   costCenter: optionalLabel,
   cell: optionalLabel,
+  cells: optionalLabels,
   manager: optionalLabel,
   acts: z.array(storedActSchema).min(1),
 });

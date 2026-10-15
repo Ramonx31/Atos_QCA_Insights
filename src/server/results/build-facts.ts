@@ -3,7 +3,8 @@ import type { DashboardFact } from "@/server/dashboard/types";
 import type { StoredUpload } from "@/server/results/stored-upload";
 
 const toList = (value: string | null) => (value ? [value] : []);
-const uploadScope = (upload: StoredUpload) => [upload.competence, upload.directorate, upload.costCenter, upload.cell, upload.manager].join("\u0001");
+const uploadCells = (upload: StoredUpload) => upload.cells.length ? upload.cells : toList(upload.cell);
+const uploadScope = (upload: StoredUpload) => [upload.competence, upload.directorate, upload.costCenter, ...uploadCells(upload), upload.manager].join("\u0001");
 
 /** Um PDF representa a fotografia completa da competência/contexto; a versão mais nova substitui a anterior no painel. */
 function latestUploadsByScope(uploads: StoredUpload[]) {
@@ -30,7 +31,7 @@ export function buildDashboardFacts(uploads: StoredUpload[]): DashboardFact[] {
       manual: item.manual,
       automated: item.automated,
       costCenter: upload.costCenter,
-      cells: toList(upload.cell),
+      cells: uploadCells(upload),
       directorates: toList(upload.directorate),
       managers: toList(upload.manager),
     };

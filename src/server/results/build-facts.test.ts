@@ -3,14 +3,19 @@ import { buildDashboardFacts } from "@/server/results/build-facts";
 import type { StoredUpload } from "@/server/results/stored-upload";
 
 const upload = (overrides: Partial<StoredUpload>): StoredUpload => ({
-  id: "a".repeat(64), uploadedAt: "2026-10-01T10:00:00.000Z", originalFilename: "p.png", screenshotPath: "screenshots/a.png",
-  competence: "2026-09", directorate: null, costCenter: null, cell: null, manager: null, acts: [{ act: "Distribuição", manual: 3, automated: 7 }], ...overrides,
+  id: "a".repeat(64), uploadedAt: "2026-10-01T10:00:00.000Z", originalFilename: "p.pdf", screenshotPath: "screenshots/a.pdf",
+  competence: "2026-09", directorate: null, costCenter: null, cell: null, cells: [], manager: null, acts: [{ act: "Distribuição", manual: 3, automated: 7 }], ...overrides,
 });
 
 describe("buildDashboardFacts", () => {
   it("gera um fato por ato e propaga etiquetas organizacionais", () => {
     const [fact] = buildDashboardFacts([upload({ cell: "Operações", manager: "Ana", costCenter: "CC1" })]);
     expect(fact).toMatchObject({ actName: "Distribuição", manual: 3, automated: 7, cells: ["Operações"], managers: ["Ana"], directorates: [], costCenter: "CC1" });
+  });
+
+  it("propaga todas as células selecionadas no mesmo envio", () => {
+    const [fact] = buildDashboardFacts([upload({ cells: ["Célula A", "Célula B"], costCenter: "CC1" })]);
+    expect(fact.cells).toEqual(["Célula A", "Célula B"]);
   });
 
   it("usa o nome da versão vigente para atos equivalentes", () => {
